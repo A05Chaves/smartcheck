@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Check</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg,
+                    #1e3a5f 0%,
+                    /* azul */
+                    #2d3568 25%,
+                    /* azul-violeta */
+                    #6a4a7a 45%,
+                    /* violeta (centro) */
+                    #b2555f 70%,
+                    /* rojo entra antes */
+                    #4a2a2f 100%
+                    /* rojo oscuro de cierre */
+                );
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: linear-gradient(135deg,
+                    #3a77b9 0%,
+                    /* azul logo */
+                    #4a5c9a 30%,
+                    /* azul-violeta */
+                    #6a4a7a 50%,
+                    /* violeta */
+                    #b2555f 75%,
+                    /* rojo logo */
+                    #8a3e45 100%
+                    /* rojo oscuro */
+                );
+            border-radius: 18px;
+            padding: 2.5rem;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+        }
+
+
+
+        .form-control {
+            background: #111827;
+            color: #f8fafc;
+            border-color: #334155;
+        }
+
+        .form-control:focus {
+            background: #0f172a;
+            color: #f8fafc;
+            border-color: #6A4A7A;
+        }
+
+        pre {
+            background: #020617;
+            color: #e5e7eb;
+            min-height: 220px;
+            white-space: pre-wrap;
+        }
+
+        .titulo-grande {
+            font-size: 2.5rem;
+            /* más grande que fs-1 */
+            font-weight: 800;
+        }
+
+        .titulo-bloque {
+            max-width: 75%;
+        }
+
+        .linea-decorativa {
+            width: 720px;
+            height: 3px;
+            background: linear-gradient(to right,
+                    rgba(255, 255, 255, 0) 0%,
+                    rgba(255, 255, 255, 0.4) 25%,
+                    rgba(255, 255, 255, 0.9) 100%);
+            border-radius: 4px;
+            margin-top: 6px;
+
+            background: linear-gradient(to right,
+                    rgba(255, 255, 255, 0.9) 0%,
+                    rgba(255, 255, 255, 0.4) 75%,
+                    rgba(255, 255, 255, 0) 100%);
+        }
+
+        .titulo-seccion {
+            margin: 2.5rem 0 1rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+            position: relative;
+        }
+
+        .titulo-seccion::after {
+            content: "";
+            display: block;
+            width: 360px;
+            height: 3px;
+            margin-top: 6px;
+            background: linear-gradient(to right,
+                    rgba(255, 255, 255, 0.2),
+                    rgba(255, 255, 255, 0.9));
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container py-5">
+
+        <!-- ===== HEADER ===== -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <div class="titulo-bloque ms-5">
+                <h2 class="mb-1 fw-bold titulo-grande">
+                    SmartCheck - Lista de Verificación
+                </h2>
+                <div class="linea-decorativa"></div>
+            </div>
+
+            <img src="img/logo.png" alt="Logo empresa" style="height:200px; object-fit:contain;">
+        </div>
+
+        <form id="ficha" novalidate>
+
+            <!-- ================= IDENTIFICACIÓN ================= -->
+            <div class="titulo-seccion">1. Identificación del proyecto</div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Proyecto</label>
+                    <input class="form-control" id="proyecto" name="proyecto" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Ejecutivo</label>
+                    <input class="form-control" id="ejecutivo" name="ejecutivo">
+                </div>
+
+                <div class="col-md-8">
+                    <label class="form-label">Dirección</label>
+                    <input class="form-control" id="direccion" name="direccion">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Georreferencia</label>
+                    <input class="form-control" id="georef" name="georef">
+                </div>
+                <div class="col-12 mt-3">
+                    <label class="form-label">Ubicación aproximada</label>
+
+                    <iframe id="mapa-georef" width="100%" height="260"
+                        style="border-radius:12px; border:1px solid #334155;" loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade" src="">
+                    </iframe>
+                </div>
+
+
+
+            </div>
+
+            <!-- ================= EDIFICACIÓN ================= -->
+            <div class="titulo-seccion">2. Características de la edificación</div>
+
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label>Pisos</label>
+                    <input class="form-control form-control-sm" id="pisos" type="number" min="1" value="1">
+                </div>
+
+                <div class="col-md-3">
+                    <label>Largo (m)</label>
+                    <input class="form-control form-control-sm" id="largo" type="number" min="1">
+                </div>
+
+                <div class="col-md-3">
+                    <label>Ancho (m)</label>
+                    <input class="form-control form-control-sm" id="ancho" type="number" min="1">
+                </div>
+
+                <div class="col-md-3">
+                    <label>Altura piso (m)</label>
+                    <input class="form-control form-control-sm" id="alto_piso" type="number" min="2" value="3">
+                </div>
+            </div>
+
+            <!-- ================= CCTV ================= -->
+            <div class="titulo-seccion">3. Sistema de videovigilancia</div>
+
+            <h6>Tipo de sistema</h6>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="tipo_ip" name="tipo" value="IP" checked>
+                <label class="form-check-label" for="tipo_ip">Sistema IP</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="tipo_analog" name="tipo" value="Analoga">
+                <label class="form-check-label" for="tipo_analog">Sistema Análogo</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="tipo_hibrido" name="tipo" value="Hibrido">
+                <label class="form-check-label" for="tipo_hibrido">Sistema Híbrido</label>
+            </div>
+
+            <!-- ================= NO HÍBRIDO ================= -->
+            <div id="no-hibrido-opciones" class="row g-3 mt-2">
+                <div class="col-md-4">
+                    <label>Cámaras por piso</label>
+                    <input class="form-control form-control-sm" id="camaras_piso" name="camaras_piso" type="number"
+                        min="0" value="0">
+                </div>
+
+                <div class="col-md-4">
+                    <label>Cámaras exteriores</label>
+                    <input class="form-control form-control-sm" id="camaras_exteriores" name="camaras_exteriores"
+                        type="number" min="0" value="0">
+                </div>
+
+                <div class="col-md-4">
+                    <label>Cámaras parqueadero</label>
+                    <input class="form-control form-control-sm" id="camaras_parqueadero" name="camaras_parqueadero"
+                        type="number" min="0" value="0">
+                </div>
+            </div>
+
+            <!-- ================= HÍBRIDO ================= -->
+            <div id="hibrido-opciones" class="row g-3 d-none mt-3">
+
+                <h6 class="text-info">Cámaras IP</h6>
+
+                <div class="col-md-4">
+                    <label>IP por piso</label>
+                    <input class="form-control form-control-sm" id="camaras_ip_piso" type="number" min="0" value="0">
+                </div>
+
+                <div class="col-md-4">
+                    <label>IP exteriores</label>
+                    <input class="form-control form-control-sm" id="camaras_ip_exteriores" type="number" min="0"
+                        value="0">
+                </div>
+
+                <div class="col-md-4">
+                    <label>IP parqueadero</label>
+                    <input class="form-control form-control-sm" id="camaras_ip_parqueadero" type="number" min="0"
+                        value="0">
+                </div>
+
+                <hr class="border-secondary">
+
+                <h6 class="text-warning">Cámaras Análogas</h6>
+
+                <div class="col-md-4">
+                    <label>Análogas por piso</label>
+                    <input class="form-control form-control-sm" id="camaras_an_piso" type="number" min="0" value="0">
+                </div>
+
+                <div class="col-md-4">
+                    <label>Análogas exteriores</label>
+                    <input class="form-control form-control-sm" id="camaras_an_exteriores" type="number" min="0"
+                        value="0">
+                </div>
+
+                <div class="col-md-4">
+                    <label>Análogas parqueadero</label>
+                    <input class="form-control form-control-sm" id="camaras_an_parqueadero" type="number" min="0"
+                        value="0">
+                </div>
+            </div>
+
+
+            <!-- ================= PARQUEADEROS ================= -->
+
+            <div class="titulo-seccion">4. Parqueaderos</div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label>Cantidad de parqueaderos</label>
+                    <input class="form-control form-control-sm" id="num_parqueaderos" name="num_parqueaderos"
+                        type="number" min="0" value="0">
+                </div>
+            </div>
+
+
+            <!-- ================= CONTROL DE ACCESOS ================= -->
+            <div class="titulo-seccion">5. Control de accesos</div>
+
+            <div class="row g-3">
+
+
+                <div class="col-md-4">
+                    <label>Ingresos (puertas controladas)</label>
+                    <input class="form-control form-control-sm" id="ingresos" type="number" min="0" value="0">
+                </div>
+
+                <div class="col-md-4">
+                    <label>Puertas doble hoja</label>
+                    <input class="form-control form-control-sm" id="puertas_doble" type="number" min="0" value="0">
+                </div>
+            </div>
+
+            <!-- ================= CANALIZACIÓN ================= -->
+            <div class="titulo-seccion">6. Canalización</div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="requiere_tuberia">
+                <label class="form-check-label">Requiere tubería</label>
+            </div>
+
+            <div id="opciones-tuberia" class="row g-3 mt-2 d-none">
+                <div class="col-md-6">
+                    <label>Tipo tubería</label>
+                    <select class="form-control form-control-sm" id="tipo_tuberia">
+                        <option>EMT</option>
+                        <option>CONDUIT</option>
+                        <option>SCH40</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label>Calibre</label>
+                    <select class="form-control form-control-sm" id="calibre_tuberia">
+                        <option>1/2"</option>
+                        <option>3/4"</option>
+                        <option>1"</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" id="canaletas">
+                <label class="form-check-label">Incluye canaletas</label>
+            </div>
+
+            <!-- ================= TOTAL ================= -->
+            <div class="titulo-seccion">7. Total cámaras</div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-control text-center fw-bold" id="camaras_total">0</div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    Guardar proyecto
+                </button>
+
+                <button type="button" class="btn btn-secondary" id="btn-preview">
+                    Vista previa técnica
+                </button>
+
+                <button type="reset" class="btn btn-outline-light">
+                    Limpiar
+                </button>
+                <button type="button" class="btn btn-success" id="btn-pdf">
+                    Exportar PDF
+                </button>
+                <button type="button" class="btn btn-success" id="btn-excel">
+                    Exportar Excel
+                </button>
+
+            </div>
+
+        </form>
+
+        <pre id="preview" class="mt-4"></pre>
+    </div>
+
+
+    <script>
+        /* ================= HELPERS ================= */
+        const $ = id => document.getElementById(id);
+        const num = id => +($(id)?.value || 0);
+        const chk = id => $(id)?.checked || false;
+
+        /* ================= FECHA / CONSECUTIVO ================= */
+        function getFechaHoraDiseno() {
+            const d = new Date();
+            const p = n => String(n).padStart(2, "0");
+            return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+        }
+
+        /* ================= NUMERACIÓN FORMULARIOS ================= */
+        function obtenerNumeroActual() {
+            return +localStorage.getItem("smartcheck_form_counter") || 0;
+        }
+
+        function incrementarNumeroFormulario() {
+            const nuevo = obtenerNumeroActual() + 1;
+            localStorage.setItem("smartcheck_form_counter", nuevo);
+            return nuevo;
+        }
+
+
+        /* ================= GUARDAR EN LOCALSTORAGE ================= */
+        function guardarProyectoLocalStorage(data) {
+            const clave = "smartcheck_proyectos";
+            const lista = JSON.parse(localStorage.getItem(clave)) || [];
+            lista.push(data);
+            localStorage.setItem(clave, JSON.stringify(lista));
+        }
+
+
+
+        /* ================= SISTEMA ================= */
+        function getTipoSistema() {
+            return document.querySelector('input[name="tipo"]:checked')?.value || "IP";
+        }
+
+        /* ================= UI SISTEMA ================= */
+        function toggleSistema() {
+            const h = getTipoSistema() === "Hibrido";
+            $("hibrido-opciones")?.classList.toggle("d-none", !h);
+            $("no-hibrido-opciones")?.classList.toggle("d-none", h);
+        }
+        document.querySelectorAll('input[name="tipo"]').forEach(r =>
+            r.addEventListener("change", () => {
+                toggleSistema();
+                calcularTotalCamaras();
+            })
+        );
+        toggleSistema();
+
+        /* ================= UI TUBERÍA ================= */
+        $("requiere_tuberia")?.addEventListener("change", e => {
+            $("opciones-tuberia")?.classList.toggle("d-none", !e.target.checked);
+        });
+
+        /* ================= CÁMARAS ================= */
+        function getTotalCamaras() {
+            const pisos = num("pisos");
+            const parq = num("num_parqueaderos");
+            const tipo = getTipoSistema();
+
+            if (tipo === "Hibrido") {
+                const totalIP =
+                    (pisos * num("camaras_ip_piso")) +
+                    (parq * num("camaras_ip_parqueadero")) +
+                    num("camaras_ip_exteriores");
+
+                const totalAN =
+                    (pisos * num("camaras_an_piso")) +
+                    (parq * num("camaras_an_parqueadero")) +
+                    num("camaras_an_exteriores");
+
+                return totalIP + totalAN;
+            }
+
+            return (pisos * num("camaras_piso")) +
+                (parq * num("camaras_parqueadero")) +
+                num("camaras_exteriores");
+        }
+
+        function getDetalleCamaras() {
+            const tipo = getTipoSistema();
+            const pisos = num("pisos");
+            const parq = num("num_parqueaderos");
+
+            if (tipo !== "Hibrido") {
+                return { tipo, total: getTotalCamaras() };
+            }
+
+            const ipTotal =
+                (pisos * num("camaras_ip_piso")) +
+                (parq * num("camaras_ip_parqueadero")) +
+                num("camaras_ip_exteriores");
+
+            const analogTotal =
+                (pisos * num("camaras_an_piso")) +
+                (parq * num("camaras_an_parqueadero")) +
+                num("camaras_an_exteriores");
+
+            return { tipo: "Hibrido", ipTotal, analogTotal, total: ipTotal + analogTotal };
+        }
+
+        function calcularTotalCamaras() {
+            const out = $("camaras_total");
+            if (out) out.textContent = getTotalCamaras();
+        }
+
+
+
+
+        /* ================= INFRAESTRUCTURA BASE ================= */
+        function calcularInfraestructura() {
+            const cams = getTotalCamaras();
+            const tipo = getTipoSistema();
+            let grabador = "";
+
+            if (tipo === "IP" || tipo === "Hibrido") {
+                grabador = cams <= 8 ? "NVR 8CH" : cams <= 16 ? "NVR 16CH" : "NVR 32CH";
+            } else {
+                grabador = cams <= 8 ? "XVR 8CH" : cams <= 16 ? "XVR 16CH" : "XVR 32CH";
+            }
+
+            return {
+                grabador,
+                // estimaciones base (puedes ajustar tus factores aquí)
+                tuberia_metros: cams * 12,
+                canaleta_metros: cams * 8,
+            };
+        }
+
+        /* ================= FUNCION PARA SELECCIONAR TIPO DE GRABADOR EN LOS SISTEMAS ================= */
+        function recomendarGrabadores(camaras, tipo) {
+            const modelo = tipo === "IP" ? "NVR" : "XVR";
+            let restantes = camaras;
+            let grabadores = [];
+
+            while (restantes > 0) {
+                if (restantes <= 8) {
+                    grabadores.push(`${modelo} 8CH`);
+                    restantes = 0;
+                } else if (restantes <= 16) {
+                    grabadores.push(`${modelo} 16CH`);
+                    restantes = 0;
+                } else {
+                    grabadores.push(`${modelo} 32CH`);
+                    restantes -= 32;
+                }
+            }
+
+            return grabadores;
+        }
+
+
+
+        /* ================= CANALIZACIÓN ================= */
+        function calcularCanalizacion(metrosTuberia, metrosCanaleta) {
+            const tubos = Math.ceil(metrosTuberia / 3);
+            const canaletas = Math.ceil(metrosCanaleta / 2);
+            const cajasPaso = Math.ceil(metrosTuberia / 9);
+            const terminales = cajasPaso * 2;
+            const curvas = cajasPaso * 3;
+            const uniones = Math.max(0, (tubos - 2) + (curvas * 2));
+
+            return { tubos, canaletas, cajasPaso, terminales, curvas, uniones };
+        }
+
+        /* ================= CABLEADO CCTV (IP / ANÁLOGO) ================= */
+        function calcularCableadoCCTV() {
+            const parq = num("num_parqueaderos");
+            const pisos = num("pisos");
+
+            const largo = num("largo");
+            const ancho = num("ancho");
+            const alto = num("alto_piso");
+
+            const diag = Math.sqrt((largo ** 2) + (ancho ** 2));
+            const dHorizontal = 0.4 * diag;
+            const vProm = ((pisos - 1) / 2) * alto;
+
+            const tipo = getTipoSistema();
+
+            // Para cálculo de tramos por sistema:
+            let camsPiso = 0, camsParq = 0, exteriores = 0;
+
+            if (tipo === "Hibrido") {
+                // Para el cableado, asumimos que IP usa UTP y Análogo usa coax+energía.
+                // Aquí reportamos un total aproximado para CCTV (sumado).
+                // Si quieres separar “Cable IP” y “Cable coax”, lo hago en la siguiente versión.
+                camsPiso = num("camaras_ip_piso") + num("camaras_an_piso");
+                camsParq = num("camaras_ip_parqueadero") + num("camaras_an_parqueadero");
+                exteriores = num("camaras_ip_exteriores") + num("camaras_an_exteriores");
+            } else {
+                camsPiso = num("camaras_piso");
+                camsParq = num("camaras_parqueadero");
+                exteriores = num("camaras_exteriores");
+            }
+
+            const camsParqueadero = parq * camsParq;
+
+            let cableCCTV = 0;
+
+            if (tipo === "IP" || tipo === "Hibrido") {
+                cableCCTV += (pisos * camsPiso * dHorizontal);
+                cableCCTV += (camsParqueadero * dHorizontal);
+                if (pisos > 1) cableCCTV += (pisos - 1) * alto;
+                cableCCTV += exteriores * dHorizontal;
+            } else {
+                const camsInternas = (pisos * camsPiso) + camsParqueadero;
+                const tramos = Math.ceil(camsInternas / 2);
+                const dCam = dHorizontal + vProm;
+                cableCCTV += tramos * (2 * dCam);
+                cableCCTV += exteriores * dHorizontal;
+            }
+
+            cableCCTV *= 1.15; // margen
+
+            return {
+                cableCCTV: Math.round(cableCCTV),
+                cableEnergiaCCTV: Math.round(cableCCTV * 0.75)
+            };
+
+
+        }
+
+        /* ================= CABLEADO CONTROL DE ACCESO ================= */
+        function calcularCableadoControlAcceso() {
+            const ingresos = num("ingresos");
+
+            const largo = num("largo");
+            const ancho = num("ancho");
+
+            const diag = Math.sqrt((largo ** 2) + (ancho ** 2));
+            const dHorizontal = 0.4 * diag;
+
+            let utp = ingresos * 2 * dHorizontal;
+            let energia = ingresos * 3 * dHorizontal;
+
+            utp *= 1.15;
+            energia *= 1.15;
+
+            return { utp: Math.round(utp), energia: Math.round(energia) };
+        }
+
+        /* ================= EQUIPOS CONTROL DE ACCESO ================= */
+        function calcularEquiposControlAcceso() {
+            const ingresos = num("ingresos");
+            const puertasDoble = num("puertas_doble");
+            const puertasSimples = Math.max(0, ingresos - puertasDoble);
+
+            const electroimanes = puertasSimples + (puertasDoble * 2);
+            const sensores = puertasSimples + (puertasDoble * 2);
+            const cierrapuertas = puertasSimples + (puertasDoble * 2);
+
+            return {
+                puertasDoble,
+                puertasSimples,
+                lectores: ingresos * 2,
+                electroimanes,
+                sensores,
+                cierrapuertas
+            };
+        }
+
+        /* ================= RESUMEN COMPLETO ================= */
+        $("btn-preview")?.addEventListener("click", () => {
+            try {
+                calcularTotalCamaras();
+
+                const tipo = getTipoSistema();
+                const detalle = getDetalleCamaras();
+                const infra = calcularInfraestructura();
+                const canal = calcularCanalizacion(infra.tuberia_metros, infra.canaleta_metros);
+                const equiposAcceso = calcularEquiposControlAcceso();
+
+                //CALCULO DE CANTIDAD DE CANALETAS
+                const cctv = calcularCableadoCCTV();
+                const cableAcceso = calcularCableadoControlAcceso();
+
+                function calcularCanaletas(metrosCable) {
+                    return Math.ceil((+metrosCable || 0) / 2);
+                }
+
+                const canaletasCantidad = calcularCanaletas(cctv.cableCCTV);
+
+
+                let resumen = `
+📋 RESUMEN TÉCNICO DEL PROYECTO
+
+Formulario N°: ${obtenerNumeroActual()}
+Fecha y hora del diseño: ${getFechaHoraDiseno()}
+
+--- PROYECTO ---
+Proyecto: ${$("proyecto").value}
+Ejecutivo: ${$("ejecutivo").value}
+Dirección: ${$("direccion").value}
+
+--- EDIFICACIÓN ---
+Pisos: ${num("pisos")}
+Largo: ${num("largo")} m
+Ancho: ${num("ancho")} m
+Altura por piso: ${num("alto_piso")} m
+
+`;
+
+                /* ===== CONTROL DE ACCESOS ===== */
+                {
+                    const totalPuertas = num("ingresos");
+                    const puertasDobles = num("puertas_doble");
+                    const puertasSimples = Math.max(0, totalPuertas - puertasDobles);
+
+                    const lectores = totalPuertas * 2;
+                    const sensores = puertasSimples + (puertasDobles * 2);
+                    const cierrapuertas = puertasSimples + (puertasDobles * 2);
+
+                    resumen += `
+--- CONTROL DE ACCESOS ---
+
+Puertas totales: ${totalPuertas}
+Puertas simples: ${puertasSimples}
+Puertas doble hoja: ${puertasDobles}
+
+Descripción técnica:
+- Puerta simple: 1 sensor, 1 brazo cierra-puertas
+- Puerta doble hoja: 2 sensores, 2 brazos cierra-puertas
+
+Inventario requerido:
+Lectores biométricos (entrada / salida): ${lectores}
+Sensores de puerta: ${sensores}
+Brazos cierra-puertas: ${cierrapuertas}
+`;
+                }
+                resumen += `
+--- CABLEADO ESTIMADO ---
+
+CCTV:
+- Cable datos CCTV: ${cctv.cableCCTV} m
+- Cable energia CCTV: ${cctv.cableEnergiaCCTV} m
+
+CONTROL DE ACCESO:
+- Cable UTP control de acceso: ${cableAcceso.utp} m
+- Cable energia control de acceso: ${cableAcceso.energia} m
+`;
+
+
+                /* ================= CCTV ================= */
+                resumen += `
+--- CCTV ---
+Tipo de sistema: ${tipo}
+Total de cámaras: ${detalle.total}
+`;
+
+                /* ===== IP ===== */
+                if (tipo === "IP" || tipo === "Hibrido") {
+                    const camsIP = tipo === "Hibrido" ? detalle.ipTotal : detalle.total;
+                    const pisos = num("pisos");
+                    const camsPorPiso = tipo === "Hibrido"
+                        ? num("camaras_ip_piso")
+                        : num("camaras_piso");
+
+                    resumen += `
+--- SISTEMA IP ---
+Cámaras IP: ${camsIP}
+Cajas 10x10: ${camsIP}
+
+
+
+`;
+
+                    const grabadoresIP = recomendarGrabadores(camsIP, "IP");
+                    resumen += `Grabadores recomendados:\n`;
+                    grabadoresIP.forEach(g => {
+                        resumen += `- ${g}\n`;
+                    });
+
+
+                    resumen += `Switches por piso:\n`;
+                    for (let i = 1; i <= pisos; i++) {
+                        if (camsPorPiso > 0) {
+                            const puertos = camsPorPiso + 1; // +1 uplink cascada
+                            const sw =
+                                puertos <= 4 ? 4 :
+                                    puertos <= 8 ? 8 :
+                                        puertos <= 16 ? 16 : 24;
+                            resumen += `- Piso ${i}: Switch ${sw} puertos\n`;
+                        }
+                    }
+
+                    resumen += `Conexión en cascada hasta cuarto técnico (piso 1)\n`;
+                }
+
+                /* ===== ANÁLOGO ===== */
+                if (tipo === "Analoga" || tipo === "Hibrido") {
+                    const camsAN = tipo === "Hibrido" ? detalle.analogTotal : detalle.total;
+
+
+
+
+                    resumen += `
+--- SISTEMA ANÁLOGO ---
+Cámaras análogas: ${camsAN}
+Cajas dexon 10x10: ${camsAN}
+Baluns (pares): ${camsAN}
+Fuentes 12 V: ${camsAN}
+
+`;
+
+
+                    const grabadoresAN = recomendarGrabadores(camsAN, "Analoga");
+                    resumen += `Grabadores recomendados:\n`;
+                    grabadoresAN.forEach(g => {
+                        resumen += `- ${g}\n`;
+                    });
+
+                }
+
+                /* ================= CANALIZACIÓN ================= */
+                resumen += `
+--- CANALIZACIÓN ---
+Requiere tubería: ${chk("requiere_tuberia") ? "SÍ" : "NO"}
+Tipo: ${chk("requiere_tuberia") ? $("tipo_tuberia").value : "-"}
+Calibre: ${chk("requiere_tuberia") ? $("calibre_tuberia").value : "-"}
+
+Tubería estimada: ${infra.tuberia_metros} m
+Tubos (medida de cada tubo 3 m): ${canal.tubos}
+Cajas de paso: ${canal.cajasPaso}
+Curvas: ${canal.curvas}
+Uniones: ${canal.uniones}
+Terminales: ${canal.terminales}
+
+Canaletas: ${chk("canaletas")
+                        ? `SÍ — ${canaletasCantidad} canaletas (2 m c/u, para ${cctv.cableCCTV} m de cable)`
+                        : "NO"}
+
+`;
+
+                $("preview").textContent = resumen.trim();
+                $("preview").scrollIntoView({ behavior: "smooth", block: "center" });
+
+            } catch (e) {
+                console.error(e);
+                alert("❌ Error generando el resumen");
+            }
+        });
+
+
+        /* ================= AUTO UPDATE TOTAL CÁMARAS ================= */
+        [
+            "pisos", "num_parqueaderos",
+            "camaras_piso", "camaras_exteriores", "camaras_parqueadero",
+            "camaras_ip_piso", "camaras_ip_parqueadero", "camaras_ip_exteriores",
+            "camaras_an_piso", "camaras_an_parqueadero", "camaras_an_exteriores"
+        ].forEach(id => {
+            $(id)?.addEventListener("input", calcularTotalCamaras);
+        });
+        calcularTotalCamaras();
+
+        /* ================= GUARDAR PROYECTO ================= */
+        $("ficha").addEventListener("submit", e => {
+            e.preventDefault();
+
+            const numero = incrementarNumeroFormulario();
+            const fecha = getFechaHoraDiseno();
+
+            const resumen = $("preview").textContent.trim();
+
+            const proyectoGuardado = {
+                numero,
+                fecha,
+                proyecto: $("proyecto").value || "",
+                ejecutivo: $("ejecutivo").value || "",
+                direccion: $("direccion").value || "",
+                tipoSistema: getTipoSistema(),
+                totalCamaras: getTotalCamaras(),
+                resumen
+            };
+
+
+
+            guardarProyectoLocalStorage(proyectoGuardado);
+
+            alert(`✅ Proyecto guardado correctamente.\nFormulario N° ${numero}`);
+        });
+
+        /* ================= EXPORTAR A PDF ================= */
+        $("btn-pdf").addEventListener("click", () => {
+            //const contenido = $("preview").textContent.trim();
+            let contenido = $("preview").textContent.trim();
+
+            // Limpieza de caracteres no compatibles
+            contenido = contenido
+                .replace(/📋/g, "")
+                .replace(/á/g, "a")
+                .replace(/é/g, "e")
+                .replace(/í/g, "i")
+                .replace(/ó/g, "o")
+                .replace(/ú/g, "u")
+                .replace(/Á/g, "A")
+                .replace(/É/g, "E")
+                .replace(/Í/g, "I")
+                .replace(/Ó/g, "O")
+                .replace(/Ú/g, "U")
+                .replace(/ñ/g, "n")
+                .replace(/Ñ/g, "N");
+
+
+            if (!contenido) {
+                alert("⚠️ Primero genera la vista previa.");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF("p", "mm", "a4");
+
+            // Título
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(16);
+            pdf.text("SmartCheck – Resumen Técnico", 20, 20);
+
+            // Subtítulo
+            pdf.setFontSize(10);
+            pdf.setFont("helvetica", "normal");
+            pdf.text(`Formulario N° ${obtenerNumeroActual()}`, 20, 28);
+            pdf.text(`Fecha: ${getFechaHoraDiseno()}`, 20, 34);
+            pdf.text(
+                `Georreferencia: ${$("georef").value || "No especificada"}`,
+                20,
+                40
+            );
+
+            // Contenido
+            pdf.setFontSize(9);
+            const texto = pdf.splitTextToSize(contenido, 170);
+            pdf.text(texto, 20, 44);
+
+            pdf.save(`SmartCheck_Formulario_${obtenerNumeroActual()}.pdf`);
+        });
+
+        /* ================= MAPA GEOREFERENCIA ================= */
+        $("georef").addEventListener("change", () => {
+            const valor = $("georef").value.trim();
+
+            if (!valor) return;
+
+            // Puede ser dirección o "lat,long"
+            const url = `https://www.google.com/maps?q=${encodeURIComponent(valor)}&output=embed`;
+
+            $("mapa-georef").src = url;
+        });
+
+        /* ================= EXPORTAR A EXCEL ================= */
+        function limpiarTextoExcel(s = "") {
+            return String(s)
+                .replace(/📋/g, "")
+                .replace(/á/g, "a").replace(/é/g, "e").replace(/í/g, "i").replace(/ó/g, "o").replace(/ú/g, "u")
+                .replace(/Á/g, "A").replace(/É/g, "E").replace(/Í/g, "I").replace(/Ó/g, "O").replace(/Ú/g, "U")
+                .replace(/ñ/g, "n").replace(/Ñ/g, "N");
+        }
+
+        function crearFilasExcel() {
+            const tipo = getTipoSistema();
+            const detalle = getDetalleCamaras();
+            const infra = calcularInfraestructura();
+            const canal = calcularCanalizacion(infra.tuberia_metros, infra.canaleta_metros);
+            const cctv = calcularCableadoCCTV();
+
+            const totalPuertas = num("ingresos");
+            const puertasDobles = num("puertas_doble");
+            const puertasSimples = Math.max(0, totalPuertas - puertasDobles);
+
+            const sensores = puertasSimples + (puertasDobles * 2);
+            const cierrapuertas = puertasSimples + (puertasDobles * 2);
+            const lectores = totalPuertas * 2;
+
+            const requiereTuberia = chk("requiere_tuberia");
+            const usaCanaletas = chk("canaletas");
+
+            const canaletasCantidad = Math.ceil((cctv.cableCCTV || 0) / 2);
+
+            // Cámaras por sistema
+            const camsIP = (tipo === "Hibrido") ? (detalle.ipTotal || 0) : (tipo === "IP" ? (detalle.total || 0) : 0);
+            const camsAN = (tipo === "Hibrido") ? (detalle.analogTotal || 0) : (tipo === "Analoga" ? (detalle.total || 0) : 0);
+
+            // Grabadores recomendados (usa tu función existente recomendarGrabadores)
+            const grabadoresIP = (camsIP > 0) ? recomendarGrabadores(camsIP, "IP").join(" + ") : "";
+            const grabadoresAN = (camsAN > 0) ? recomendarGrabadores(camsAN, "Analoga").join(" + ") : "";
+
+            // Switches por piso (solo IP)
+            const pisos = num("pisos");
+            const camsPorPisoIP = (tipo === "Hibrido") ? num("camaras_ip_piso") : num("camaras_piso");
+            let switches = "";
+            if (camsPorPisoIP > 0 && (tipo === "IP" || tipo === "Hibrido")) {
+                const puertos = camsPorPisoIP + 1; // +1 uplink
+                const sw = (puertos <= 4) ? 4 : (puertos <= 8) ? 8 : (puertos <= 16) ? 16 : 24;
+                switches = `1 switch por piso: ${pisos} x Switch ${sw} puertos (cascada a piso 1)`;
+            }
+
+            // Hoja 1: Resumen
+            const resumen = [
+                ["Campo", "Valor"],
+                ["Formulario N°", obtenerNumeroActual()],
+                ["Fecha", getFechaHoraDiseno()],
+                ["Proyecto", $("proyecto")?.value || ""],
+                ["Ejecutivo", $("ejecutivo")?.value || ""],
+                ["Dirección", $("direccion")?.value || ""],
+                ["Georreferencia", $("georef")?.value || ""],
+                ["Tipo sistema", tipo],
+                ["Total cámaras", detalle.total ?? getTotalCamaras()],
+                ["Pisos", num("pisos")],
+                ["Largo (m)", num("largo")],
+                ["Ancho (m)", num("ancho")],
+                ["Altura piso (m)", num("alto_piso")],
+            ];
+
+            // Hoja 2: Inventario
+            const inventario = [
+                ["Categoría", "Ítem", "Cantidad", "Notas"],
+
+                /* ===== CCTV – IP ===== */
+                ["CCTV IP", "Cámaras IP totales", camsIP, ""],
+                ["CCTV IP", "Cámaras IP por piso", num("pisos") * num("camaras_ip_piso"), ""],
+                ["CCTV IP", "Cámaras IP parqueadero", num("num_parqueaderos") * num("camaras_ip_parqueadero"), ""],
+                ["CCTV IP", "Cámaras IP exteriores", num("camaras_ip_exteriores"), ""],
+                ["CCTV IP", "Cajas 10x10 (IP)", camsIP, "1 por cámara"],
+                ["CCTV IP", "Grabadores NVR", grabadoresIP, "8 / 16 / 32 canales"],
+                ["CCTV IP", "Switches", switches, "1 por piso + cascada"],
+
+                /* ===== CCTV – ANÁLOGO ===== */
+                ["CCTV Análogo", "Cámaras análogas totales", camsAN, ""],
+                ["CCTV Análogo", "Cámaras análogas por piso", num("pisos") * num("camaras_an_piso"), ""],
+                ["CCTV Análogo", "Cámaras análogas parqueadero", num("num_parqueaderos") * num("camaras_an_parqueadero"), ""],
+                ["CCTV Análogo", "Cámaras análogas exteriores", num("camaras_an_exteriores"), ""],
+                ["CCTV Análogo", "Cajas 10x10 (Análogo)", camsAN, "1 por cámara"],
+                ["CCTV Análogo", "Balunes (pares)", camsAN, "1 par por cámara"],
+                ["CCTV Análogo", "Fuentes 12V", camsAN, "1 por cámara"],
+                ["CCTV Análogo", "Grabadores XVR", grabadoresAN, "8 / 16 / 32 canales"],
+
+                /* ===== CONTROL DE ACCESOS ===== */
+                ["Accesos", "Puertas totales", totalPuertas, ""],
+                ["Accesos", "Puertas simples", puertasSimples, ""],
+                ["Accesos", "Puertas doble hoja", puertasDobles, ""],
+                ["Accesos", "Lectores biométricos", lectores, "Entrada + salida"],
+                ["Accesos", "Sensores de puerta", sensores, "Simple=1 / Doble=2"],
+                ["Accesos", "Brazos cierra-puertas", cierrapuertas, "Simple=1 / Doble=2"],
+
+                /* ===== CANALIZACIÓN ===== */
+                ["Canalización", "Requiere tubería", requiereTuberia ? "Sí" : "No", ""],
+                ["Canalización", "Tipo tubería", requiereTuberia ? $("tipo_tuberia").value : "-", ""],
+                ["Canalización", "Calibre", requiereTuberia ? $("calibre_tuberia").value : "-", ""],
+                ["Canalización", "Tubería total (m)", requiereTuberia ? infra.tuberia_metros : 0, ""],
+                ["Canalización", "Tubos (3 m)", requiereTuberia ? canal.tubos : 0, ""],
+                ["Canalización", "Cajas de paso", requiereTuberia ? canal.cajasPaso : 0, "Cada 3 tubos"],
+                ["Canalización", "Curvas", requiereTuberia ? canal.curvas : 0, ""],
+                ["Canalización", "Uniones", requiereTuberia ? canal.uniones : 0, ""],
+                ["Canalización", "Terminales", requiereTuberia ? canal.terminales : 0, ""],
+
+                /* ===== CANALETAS ===== */
+                ["Canalización", "Cable CCTV total (m)", cctv.cableCCTV, ""],
+                ["Canalización", "Canaletas (2 m)", usaCanaletas ? canaletasCantidad : 0, "Cable / 2 m"]
+            ];
+
+
+            // Limpieza rápida (evita caracteres raros en Excel también)
+            for (const row of resumen) row[1] = limpiarTextoExcel(row[1]);
+            for (const row of inventario) {
+                row[1] = limpiarTextoExcel(row[1]);
+                row[3] = limpiarTextoExcel(row[3]);
+            }
+
+            return { resumen, inventario };
+        }
+
+        $("btn-excel")?.addEventListener("click", () => {
+            // Recomendación: exige tener resumen generado (opcional)
+            if (!$("preview")?.textContent.trim()) {
+                alert("⚠️ Primero genera la vista previa.");
+                return;
+            }
+
+            const { resumen, inventario } = crearFilasExcel();
+
+            const wb = XLSX.utils.book_new();
+
+            const ws1 = XLSX.utils.aoa_to_sheet(resumen);
+            XLSX.utils.book_append_sheet(wb, ws1, "Resumen");
+
+            const ws2 = XLSX.utils.aoa_to_sheet(inventario);
+            XLSX.utils.book_append_sheet(wb, ws2, "Inventario");
+
+            const nombre = `SmartCheck_Formulario_${obtenerNumeroActual()}.xlsx`;
+            XLSX.writeFile(wb, nombre);
+        });
+
+    </script>
+
+
+</body>
+
+</html>
