@@ -1084,12 +1084,15 @@ Canaletas: ${chk("canaletas")
             window.addEventListener("load", () => {
                 navigator.serviceWorker
                     .register("/service-worker.js")
-                    .then(() => console.log("✅ Service Worker registrado"))
-                    .catch(err => console.error("❌ Error SW:", err));
+                    .then(reg => {
+                        console.log("✅ Service Worker registrado:", reg.scope);
+                    })
+                    .catch(err => {
+                        console.error("❌ Error registrando Service Worker:", err);
+                    });
             });
         }
     </script>
-
 
 </body>
 
